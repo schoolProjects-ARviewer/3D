@@ -1,20 +1,16 @@
 <!DOCTYPE html>
-<html lang="nl">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>AR Viewer</title>
-    <script>
-        function openAR() {
-            const arLink = document.createElement("a");
-            arLink.rel = "ar";
-            arLink.href = "Horizontal exhibitor.glb";  // Pas dit aan als je bestand een andere naam heeft
-            arLink.click();
-        }
-    </script>
 </head>
-<body onload="openAR()">
-    <h1>AR Model wordt geladen...</h1>
-    <p>Als er niets gebeurt, klik dan <a href="model.glb" rel="ar">hier</a>.</p>
+<body>
+    <h1>AR Viewer for 3D Files</h1>
+    <!-- Voeg hier de AR viewer in -->
+    <model-viewer src="path/to/Horizontal exhibitor.glb" alt="A 3D model" auto-rotate camera-controls ar ar-modes="webxr scene-viewer quick-look" style="width: 100%; height: 500px;"></model-viewer>
+
+    <!-- Voeg de model-viewer script toe -->
+    <script type="module" src="https://unpkg.com/@google/model-viewer/dist/model-viewer.min.js"></script>
 </body>
 </html>
