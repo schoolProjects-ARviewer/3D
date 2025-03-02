@@ -3,10 +3,23 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Testpagina1</title>
+    <script type="module" src="https://unpkg.com/@google/model-viewer@latest"></script>
+    <title>3D Model Viewer</title>
+    <style>
+        body { text-align: center; font-family: Arial, sans-serif; margin: 20px; }
+        model-viewer { width: 100%; max-width: 600px; height: 400px; }
+    </style>
 </head>
 <body>
-    <h1>Hallo, GitHub Pages werkt!</h1>
-    <p>Als je dit ziet, werkt je GitHub Pages correct. 🎉</p>
+    <h1>Bekijk het model in AR</h1>
+    <model-viewer 
+        src="model.glb"  <!-- Pas dit aan als je bestand een andere naam heeft -->
+        alt="3D model" 
+        auto-rotate 
+        camera-controls 
+        ar>
+    </model-viewer>
+    <p>Scan deze QR-code om het model in AR te bekijken.</p>
 </body>
 </html>
+
