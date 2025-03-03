@@ -34,6 +34,18 @@
             max-width: 400px;
             margin: 20px auto;
         }
+        #scanner-container {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+        }
     </style>
 </head>
 <body>
@@ -55,22 +67,35 @@
     <button onclick="startQRScanner()">📷 Scan QR-code</button>
     <button onclick="openAR()">📲 Bekijk in AR</button>
 
-    <!-- Video element voor QR-scanner -->
-    <video id="video"></video>
+    <!-- QR Scanner Container -->
+    <div id="scanner-container">
+        <video id="video"></video>
+        <button onclick="stopQRScanner()">❌ Stop scannen</button>
+    </div>
 
     <!-- Model-viewer script -->
     <script type="module" src="https://unpkg.com/@google/model-viewer/dist/model-viewer.min.js"></script>
 
     <script>
+        let scanning = false;
+
         function startQRScanner() {
+            const scannerContainer = document.getElementById("scanner-container");
             const video = document.getElementById("video");
-            video.style.display = "block";
-            navigator.mediaDevices.getUserMedia({ video: { facingMode: "environment" } }).then(stream => {
-                video.srcObject = stream;
-                video.setAttribute("playsinline", true);
-                video.play();
-                scanQRCode(video);
-            });
+            scannerContainer.style.display = "flex";
+
+            navigator.mediaDevices.getUserMedia({ video: { facingMode: "environment" } })
+                .then(stream => {
+                    video.srcObject = stream;
+                    video.setAttribute("playsinline", true);
+                    video.play();
+                    scanning = true;
+                    scanQRCode(video);
+                })
+                .catch(error => {
+                    alert("Kan geen toegang krijgen tot de camera. Controleer de browserinstellingen.");
+                    console.error(error);
+                });
         }
 
         function scanQRCode(video) {
@@ -78,6 +103,8 @@
             const context = canvas.getContext("2d");
 
             function tick() {
+                if (!scanning) return;
+
                 if (video.readyState === video.HAVE_ENOUGH_DATA) {
                     canvas.width = video.videoWidth;
                     canvas.height = video.videoHeight;
@@ -87,7 +114,7 @@
 
                     if (code) {
                         loadModel(code.data);
-                        stopQRScanner(video);
+                        stopQRScanner();
                         return;
                     }
                 }
@@ -96,13 +123,21 @@
             tick();
         }
 
-        function stopQRScanner(video) {
-            video.style.display = "none";
-            video.srcObject.getTracks().forEach(track => track.stop());
+        function stopQRScanner() {
+            const scannerContainer = document.getElementById("scanner-container");
+            const video = document.getElementById("video");
+            scanning = false;
+            scannerContainer.style.display = "none";
+            video.srcObject?.getTracks().forEach(track => track.stop());
         }
 
         function loadModel(modelURL) {
             let modelViewer = document.getElementById("ar-viewer");
+
+            if (!modelURL.includes(".glb") && !modelURL.includes(".usdz")) {
+                alert("Geen geldig 3D-model gevonden in de QR-code.");
+                return;
+            }
 
             if (modelURL.endsWith(".usdz")) {
                 modelViewer.setAttribute("ios-src", modelURL);
