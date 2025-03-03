@@ -10,12 +10,13 @@
         body { text-align: center; font-family: Arial, sans-serif; }
         model-viewer { width: 100%; height: 500px; }
         button { margin: 10px; padding: 10px 20px; font-size: 16px; cursor: pointer; }
-        #qr-reader { width: 300px; margin: auto; display: none; }
+        #qr-reader-container { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.8); text-align: center; }
+        #qr-reader { width: 300px; margin-top: 50px; }
     </style>
 </head>
 <body>
 
-    <h1>Scan een QR-code om een model te laden v</h1>
+    <h1>Scan een QR-code om een model te laden - optimized</h1>
 
     <!-- Model Viewer -->
     <model-viewer id="ar-viewer"
@@ -27,17 +28,20 @@
     <br>
 
     <!-- Knoppen -->
-    <button onclick="startQRScanner()">📷 Scan QR-code</button>
+    <button onclick="openQRScanner()">📷 Scan QR-code</button>
     <button onclick="startAR()">🔮 Bekijk in AR</button>
 
-    <!-- QR-code scanner -->
-    <div id="qr-reader"></div>
+    <!-- QR-code scanner scherm -->
+    <div id="qr-reader-container">
+        <div id="qr-reader"></div>
+        <button onclick="closeQRScanner()">❌ Annuleren</button>
+    </div>
 
     <script>
         let qrScanner;
 
-        function startQRScanner() {
-            document.getElementById("qr-reader").style.display = "block";
+        function openQRScanner() {
+            document.getElementById("qr-reader-container").style.display = "block";
 
             qrScanner = new Html5Qrcode("qr-reader");
             qrScanner.start(
@@ -49,7 +53,7 @@
                     if (decodedText.startsWith("https://")) {
                         modelViewer.src = decodedText;
                         console.log("Model geladen:", decodedText);
-                        stopQRScanner(); // Scanner stoppen na succesvol scannen
+                        closeQRScanner(); // Scanner sluiten na succesvol scannen
                     }
                 },
                 (errorMessage) => {
@@ -58,10 +62,10 @@
             );
         }
 
-        function stopQRScanner() {
+        function closeQRScanner() {
             if (qrScanner) {
                 qrScanner.stop().then(() => {
-                    document.getElementById("qr-reader").style.display = "none";
+                    document.getElementById("qr-reader-container").style.display = "none";
                 }).catch((err) => console.log("Fout bij stoppen scanner:", err));
             }
         }
@@ -74,4 +78,3 @@
 
 </body>
 </html>
-
