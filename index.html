@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>3Dmaatwerkmakers</title>
+    <title>AR Viewer</title>
 
     <!-- QR Scanner Library -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html5-qrcode/2.3.8/html5-qrcode.min.js"></script>
@@ -31,6 +31,8 @@
         button:hover {
             background-color: #0056b3;
         }
+
+        /* QR Scanner container */
         #qr-container {
             display: none;
             position: fixed;
@@ -47,11 +49,33 @@
             width: 300px;
             height: 300px;
             background: white;
+            border: 5px solid transparent;
+            transition: border-color 0.3s;
+        }
+        .qr-detected {
+            border-color: limegreen !important;
+        }
+        #qr-message {
+            color: white;
+            font-size: 20px;
+            margin-top: 10px;
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+        .show-message {
+            opacity: 1 !important;
+        }
+
+        /* Laadbalk */
+        #loading {
+            display: none;
+            margin-top: 20px;
+            font-size: 18px;
         }
     </style>
 </head>
 <body>
-    <h1>AR Viewer for 3D Files</h1>
+    <h1>AR Viewer for 3D Files by 3Dmaatwerkmakers</h1>
     
     <!-- Model Viewer -->
     <model-viewer 
@@ -68,9 +92,13 @@
     <button onclick="startQRScanner()">📷 Scan QR Code</button>
     <button onclick="openAR()">🌍 Bekijk in AR</button>
 
+    <!-- Laadindicator -->
+    <p id="loading">⏳ Model wordt geladen...</p>
+
     <!-- QR Scanner Container -->
     <div id="qr-container">
         <div id="qr-reader"></div>
+        <p id="qr-message">QR-code gedetecteerd! Laden...</p>
         <button onclick="stopQRScanner()">⛔ Sluiten</button>
     </div>
 
@@ -80,6 +108,9 @@
     <script>
         let html5QrCode;
         let scannerStarted = false;
+        const qrReader = document.getElementById("qr-reader");
+        const qrMessage = document.getElementById("qr-message");
+        const loadingText = document.getElementById("loading");
 
         function startQRScanner() {
             document.getElementById("qr-container").style.display = "flex";
@@ -91,8 +122,16 @@
                     { fps: 10, qrbox: 250 },
                     (decodedText) => {
                         console.log("✅ QR-code gescand:", decodedText);
-                        document.getElementById("ar-viewer").setAttribute("src", decodedText);
-                        stopQRScanner();
+                        
+                        // Visuele feedback
+                        qrReader.classList.add("qr-detected");
+                        qrMessage.classList.add("show-message");
+
+                        // Wacht even zodat de gebruiker het ziet
+                        setTimeout(() => {
+                            document.getElementById("ar-viewer").setAttribute("src", decodedText);
+                            stopQRScanner();
+                        }, 1500);
                     },
                     (errorMessage) => {
                         console.log("QR Scan fout:", errorMessage);
@@ -106,6 +145,8 @@
 
         function stopQRScanner() {
             document.getElementById("qr-container").style.display = "none";
+            qrReader.classList.remove("qr-detected");
+            qrMessage.classList.remove("show-message");
             if (html5QrCode) {
                 html5QrCode.stop().catch(err => console.log("Fout bij stoppen scanner:", err));
             }
