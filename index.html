@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AR Viewer</title>
+    <title>AR Viewer WV</title>
 
     <!-- QR Scanner Library -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html5-qrcode/2.3.8/html5-qrcode.min.js"></script>
@@ -49,21 +49,12 @@
             width: 300px;
             height: 300px;
             background: white;
-            border: 5px solid transparent;
-            transition: border-color 0.3s;
-        }
-        .qr-detected {
-            border-color: limegreen !important;
         }
         #qr-message {
             color: white;
             font-size: 20px;
             margin-top: 10px;
-            opacity: 0;
-            transition: opacity 0.3s;
-        }
-        .show-message {
-            opacity: 1 !important;
+            display: none;
         }
 
         /* Laadbalk */
@@ -75,7 +66,7 @@
     </style>
 </head>
 <body>
-    <h1>AR Viewer for 3D Files by 3Dmaatwerkmakers</h1>
+    <h1>product by 3Dmaatwerkmakers</h1>
     
     <!-- Model Viewer -->
     <model-viewer 
@@ -98,7 +89,7 @@
     <!-- QR Scanner Container -->
     <div id="qr-container">
         <div id="qr-reader"></div>
-        <p id="qr-message">QR-code gedetecteerd! Laden...</p>
+        <p id="qr-message">QR-code gedetecteerd! Model wordt geladen...</p>
         <button onclick="stopQRScanner()">⛔ Sluiten</button>
     </div>
 
@@ -107,46 +98,31 @@
     
     <script>
         let html5QrCode;
-        let scannerStarted = false;
-        const qrReader = document.getElementById("qr-reader");
-        const qrMessage = document.getElementById("qr-message");
-        const loadingText = document.getElementById("loading");
-
+        
         function startQRScanner() {
             document.getElementById("qr-container").style.display = "flex";
-
-            if (!scannerStarted) {
-                html5QrCode = new Html5Qrcode("qr-reader");
-                html5QrCode.start(
-                    { facingMode: "environment" }, // Achterste camera
-                    { fps: 10, qrbox: 250 },
-                    (decodedText) => {
-                        console.log("✅ QR-code gescand:", decodedText);
-                        
-                        // Visuele feedback
-                        qrReader.classList.add("qr-detected");
-                        qrMessage.classList.add("show-message");
-
-                        // Wacht even zodat de gebruiker het ziet
-                        setTimeout(() => {
-                            document.getElementById("ar-viewer").setAttribute("src", decodedText);
-                            stopQRScanner();
-                        }, 1500);
-                    },
-                    (errorMessage) => {
-                        console.log("QR Scan fout:", errorMessage);
-                    }
-                ).catch(err => {
-                    console.error("Fout bij het starten van de scanner:", err);
-                });
-                scannerStarted = true;
-            }
+            document.getElementById("qr-message").style.display = "none";
+            html5QrCode = new Html5Qrcode("qr-reader");
+            html5QrCode.start(
+                { facingMode: "environment" },
+                { fps: 10, qrbox: 250 },
+                (decodedText) => {
+                    console.log("✅ QR-code gescand:", decodedText);
+                    document.getElementById("qr-message").style.display = "block";
+                    document.getElementById("loading").style.display = "block";
+                    document.getElementById("ar-viewer").setAttribute("src", decodedText);
+                    stopQRScanner();
+                },
+                (errorMessage) => {
+                    console.log("QR Scan fout:", errorMessage);
+                }
+            ).catch(err => {
+                console.error("Fout bij het starten van de scanner:", err);
+            });
         }
 
         function stopQRScanner() {
             document.getElementById("qr-container").style.display = "none";
-            qrReader.classList.remove("qr-detected");
-            qrMessage.classList.remove("show-message");
             if (html5QrCode) {
                 html5QrCode.stop().catch(err => console.log("Fout bij stoppen scanner:", err));
             }
