@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AR Viewer WV1</title>
+    <title>AR Viewer WVwv</title>
     <style>
         body {
             text-align: center;
@@ -13,7 +13,7 @@
             width: 100%;
             height: 500px;
             margin-top: 20px;
-            display: none; /* Verberg tot een model wordt geladen */
+            display: none;
         }
         button {
             background-color: #007BFF;
@@ -50,8 +50,7 @@
 <body>
     <h1>AR Viewer for 3D Files</h1>
     
-    <button onclick="startQRScanner()">Scan QR Code</button>
-    <button onclick="resetViewer()">Nieuwe QR scannen</button>
+    <button id="qr-button" onclick="startQRScanner()">Scan QR Code</button>
 
     <div id="scanner-container">
         <video id="qr-video"></video>
@@ -74,6 +73,7 @@
         let video = document.getElementById("qr-video");
         let scannerContainer = document.getElementById("scanner-container");
         let modelViewer = document.getElementById("ar-viewer");
+        let qrButton = document.getElementById("qr-button");
         let stream;
 
         function startQRScanner() {
@@ -126,12 +126,7 @@
         function loadModel(url) {
             modelViewer.src = url;
             modelViewer.style.display = "block";
-        }
-
-        function resetViewer() {
-            modelViewer.src = "";
-            modelViewer.style.display = "none";
-            startQRScanner();
+            qrButton.innerText = "Nieuwe QR scannen";
         }
     </script>
 </body>
