@@ -4,60 +4,61 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>AR Viewer WV</title>
-    <style>
-        body {
-            text-align: center;
-            font-family: Arial, sans-serif;
-        }
-        model-viewer {
-            width: 100%;
-            height: 500px;
-            margin-top: 20px;
-        }
-        button {
-            background-color: #007BFF;
-            color: white;
-            border: none;
-            padding: 10px 20px;
-            font-size: 18px;
-            border-radius: 5px;
-            cursor: pointer;
-            margin-top: 20px;
-        }
-        button:hover {
-            background-color: #0056b3;
-        }
-    </style>
+    <script type="module" src="https://unpkg.com/@google/model-viewer/dist/model-viewer.min.js"></script>
 </head>
 <body>
-    <h1>AR Viewer for 3D Files + KNOP</h1>
-    
+    <h1>AR Viewer for 3D Files - new</h1>
+
+    <!-- Dropdown menu voor modelkeuze -->
+    <label for="model-selector">Kies een model:</label>
+    <select id="model-selector" onchange="changeModel()">
+        <option value="https://www.googleapis.com/drive/v3/files/1MPloneteMdAoZ61T91MGB-f8g8dal7pY?alt=media&key=JOUW_API_KEY">Model 1</option>
+        <option value="https://www.googleapis.com/drive/v3/files/ANDERE_ID?alt=media&key=JOUW_API_KEY">Model 2</option>
+    </select>
+
+    <br><br>
+
+    <!-- QR-code invoerveld -->
+    <label for="qr-input">Scan een QR-code:</label>
+    <input type="text" id="qr-input" placeholder="Plak hier de gescande link" oninput="loadFromQR()">
+
+    <br><br>
+
     <!-- Model Viewer -->
-    <model-viewer 
-        id="ar-viewer"
-        src="https://www.googleapis.com/drive/v3/files/1MPloneteMdAoZ61T91MGB-f8g8dal7pY?alt=media&key=AIzaSyBJi5XYF7oaLS5W7RPfX4m3HqcCK8i_jcs"
-        alt="A 3D model" 
-        auto-rotate 
-        camera-controls 
-        ar 
-        ar-modes="webxr scene-viewer quick-look">
+    <model-viewer id="ar-viewer" 
+        src="https://www.googleapis.com/drive/v3/files/1MPloneteMdAoZ61T91MGB-f8g8dal7pY?alt=media&key=JOUW_API_KEY"
+        alt="3D Model" 
+        auto-rotate camera-controls ar ar-modes="webxr scene-viewer quick-look"
+        style="width: 100%; height: 500px;">
     </model-viewer>
 
-    <!-- Knop om AR-modus te openen -->
-    <button onclick="openAR()">Bekijk in AR</button>
+    <br><br>
 
-    <!-- Model-viewer script -->
-    <script type="module" src="https://unpkg.com/@google/model-viewer/dist/model-viewer.min.js"></script>
-    
+    <!-- AR Start knop -->
+    <button onclick="startAR()">Bekijk in AR</button>
+
     <script>
-        function openAR() {
-            const modelViewer = document.getElementById("ar-viewer");
-            if (modelViewer.canActivateAR) {
-                modelViewer.activateAR();
-            } else {
-                alert("AR-weergave wordt niet ondersteund op dit apparaat.");
+        function changeModel() {
+            let modelViewer = document.getElementById("ar-viewer");
+            let selectedModel = document.getElementById("model-selector").value;
+            modelViewer.src = selectedModel;
+        }
+
+        function loadFromQR() {
+            let qrInput = document.getElementById("qr-input").value;
+            let modelViewer = document.getElementById("ar-viewer");
+
+            if (qrInput.startsWith("https://")) {
+                modelViewer.src = qrInput;
             }
         }
+
+        function startAR() {
+            let modelViewer = document.getElementById("ar-viewer");
+            modelViewer.activateAR();
+        }
     </script>
+
 </body>
 </html>
+
