@@ -3,7 +3,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AR Viewer sWV</title>
+    <title>AR Viewer WV</title>
+
+    <!-- QR Scanner Library -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html5-qrcode/2.3.8/html5-qrcode.min.js"></script>
+
     <style>
         body {
             text-align: center;
@@ -13,7 +17,6 @@
             width: 100%;
             height: 500px;
             margin-top: 20px;
-            display: none;
         }
         button {
             background-color: #007BFF;
@@ -28,7 +31,9 @@
         button:hover {
             background-color: #0056b3;
         }
-        #scanner-container {
+
+        /* QR Scanner container */
+        #qr-container {
             display: none;
             position: fixed;
             top: 0;
@@ -40,25 +45,33 @@
             align-items: center;
             flex-direction: column;
         }
-        video {
-            width: 80%;
-            max-width: 400px;
-            border: 5px solid white;
+        #qr-reader {
+            width: 300px;
+            height: 300px;
+            background: white;
+        }
+        #qr-message {
+            color: white;
+            font-size: 20px;
+            margin-top: 10px;
+            display: none;
+        }
+
+        /* Laadbalk */
+        #loading {
+            display: none;
+            margin-top: 20px;
+            font-size: 18px;
         }
     </style>
 </head>
 <body>
-    <h1>AR Viewer for 3D Files</h1>
+    <h1>hAR Viewer for 3D Files</h1>
     
-    <button id="qr-button" onclick="startQRScanner()">Scan QR Code</button>
-
-    <div id="scanner-container">
-        <video id="qr-video"></video>
-        <button onclick="stopQRScanner()">Stop met scannen</button>
-    </div>
-
+    <!-- Model Viewer -->
     <model-viewer 
         id="ar-viewer"
+        src=""
         alt="A 3D model" 
         auto-rotate 
         camera-controls 
@@ -66,67 +79,62 @@
         ar-modes="webxr scene-viewer quick-look">
     </model-viewer>
 
+    <!-- Knoppen -->
+    <button onclick="startQRScanner()">📷 Scan QR Code</button>
+    <button onclick="openAR()">🌍 Bekijk in AR</button>
+
+    <!-- Laadindicator -->
+    <p id="loading">⏳ Model wordt geladen...</p>
+
+    <!-- QR Scanner Container -->
+    <div id="qr-container">
+        <div id="qr-reader"></div>
+        <p id="qr-message">QR-code gedetecteerd! Model wordt geladen...</p>
+        <button onclick="stopQRScanner()">⛔ Sluiten</button>
+    </div>
+
+    <!-- Model-viewer script -->
     <script type="module" src="https://unpkg.com/@google/model-viewer/dist/model-viewer.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jsQR/1.4.0/jsQR.min.js"></script>
-
+    
     <script>
-        let video = document.getElementById("qr-video");
-        let scannerContainer = document.getElementById("scanner-container");
-        let modelViewer = document.getElementById("ar-viewer");
-        let qrButton = document.getElementById("qr-button");
-        let stream;
-
+        let html5QrCode;
+        
         function startQRScanner() {
-            scannerContainer.style.display = "flex";
-            navigator.mediaDevices.getUserMedia({ video: { facingMode: "environment" } })
-                .then(function(mediaStream) {
-                    stream = mediaStream;
-                    video.srcObject = stream;
-                    video.setAttribute("playsinline", true);
-                    video.play();
-                    scanQR();
-                })
-                .catch(function(err) {
-                    console.error("Kan camera niet openen:", err);
-                });
-        }
-
-        function scanQR() {
-            let canvas = document.createElement("canvas");
-            let ctx = canvas.getContext("2d");
-
-            function processFrame() {
-                if (video.readyState === video.HAVE_ENOUGH_DATA) {
-                    canvas.width = video.videoWidth;
-                    canvas.height = video.videoHeight;
-                    ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
-                    let imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
-                    let qrCode = jsQR(imageData.data, canvas.width, canvas.height);
-
-                    if (qrCode) {
-                        stopQRScanner();
-                        loadModel(qrCode.data);
-                    } else {
-                        requestAnimationFrame(processFrame);
-                    }
-                } else {
-                    requestAnimationFrame(processFrame);
+            document.getElementById("qr-container").style.display = "flex";
+            document.getElementById("qr-message").style.display = "none";
+            html5QrCode = new Html5Qrcode("qr-reader");
+            html5QrCode.start(
+                { facingMode: "environment" },
+                { fps: 10, qrbox: 250 },
+                (decodedText) => {
+                    console.log("✅ QR-code gescand:", decodedText);
+                    document.getElementById("qr-message").style.display = "block";
+                    document.getElementById("loading").style.display = "block";
+                    document.getElementById("ar-viewer").setAttribute("src", decodedText);
+                    stopQRScanner();
+                },
+                (errorMessage) => {
+                    console.log("QR Scan fout:", errorMessage);
                 }
-            }
-            requestAnimationFrame(processFrame);
+            ).catch(err => {
+                console.error("Fout bij het starten van de scanner:", err);
+            });
         }
 
         function stopQRScanner() {
-            if (stream) {
-                stream.getTracks().forEach(track => track.stop());
+            document.getElementById("qr-container").style.display = "none";
+            if (html5QrCode) {
+                html5QrCode.stop().catch(err => console.log("Fout bij stoppen scanner:", err));
             }
-            scannerContainer.style.display = "none";
         }
 
-        function loadModel(url) {
-            modelViewer.src = url;
-            modelViewer.style.display = "block";
-            qrButton.innerText = "Scan Nieuwe QR Code";
+        function openAR() {
+            const modelViewer = document.getElementById("ar-viewer");
+            if (modelViewer.canActivateAR) {
+                modelViewer.activateAR();
+            } else {
+                alert("AR-weergave wordt niet ondersteund op dit apparaat.");
+            }
         }
     </script>
 </body>
