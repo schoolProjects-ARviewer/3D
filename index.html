@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AR Viewer Wesley</title>
+    <title>AR Viewer sWV</title>
     <style>
         body {
             text-align: center;
@@ -54,7 +54,6 @@
 
     <div id="scanner-container">
         <video id="qr-video"></video>
-        <canvas id="qr-canvas" style="display: none;"></canvas>
         <button onclick="stopQRScanner()">Stop met scannen</button>
     </div>
 
@@ -72,8 +71,6 @@
 
     <script>
         let video = document.getElementById("qr-video");
-        let canvas = document.getElementById("qr-canvas");
-        let ctx = canvas.getContext("2d");
         let scannerContainer = document.getElementById("scanner-container");
         let modelViewer = document.getElementById("ar-viewer");
         let qrButton = document.getElementById("qr-button");
@@ -95,6 +92,9 @@
         }
 
         function scanQR() {
+            let canvas = document.createElement("canvas");
+            let ctx = canvas.getContext("2d");
+
             function processFrame() {
                 if (video.readyState === video.HAVE_ENOUGH_DATA) {
                     canvas.width = video.videoWidth;
@@ -126,7 +126,7 @@
         function loadModel(url) {
             modelViewer.src = url;
             modelViewer.style.display = "block";
-            qrButton.innerText = "Nieuwe QR scannen";
+            qrButton.innerText = "Scan Nieuwe QR Code";
         }
     </script>
 </body>
