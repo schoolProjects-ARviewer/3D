@@ -3,8 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AR Viewer WV</title>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jsqr/1.4.0/jsQR.min.js"></script>
+    <title>AR Viewer WwV</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jsQR/1.3.2/jsQR.min.js"></script> <!-- QR-scanner -->
     <style>
         body {
             text-align: center;
@@ -23,16 +23,10 @@
             font-size: 18px;
             border-radius: 5px;
             cursor: pointer;
-            margin: 10px;
+            margin-top: 20px;
         }
         button:hover {
             background-color: #0056b3;
-        }
-        #video {
-            display: none;
-            width: 100%;
-            max-width: 400px;
-            margin: 20px auto;
         }
         #scanner-container {
             display: none;
@@ -46,11 +40,15 @@
             align-items: center;
             flex-direction: column;
         }
+        #video {
+            width: 80%;
+            max-width: 400px;
+        }
     </style>
 </head>
 <body>
-    <h1>AR Viewer met QR Scan</h1>
-
+    <h1>AR Viewer for 3D Files</h1>
+    
     <!-- Model Viewer -->
     <model-viewer 
         id="ar-viewer"
@@ -59,42 +57,42 @@
         auto-rotate 
         camera-controls 
         ar 
-        ar-modes="webxr scene-viewer quick-look"
-        ios-src="">
+        ar-modes="webxr scene-viewer quick-look">
     </model-viewer>
 
     <!-- Knoppen -->
-    <button onclick="startQRScanner()">📷 Scan QR-code</button>
-    <button onclick="openAR()">📲 Bekijk in AR</button>
+    <button onclick="startQRScanner()">📷 Scan QR Code</button>
+    <button onclick="openAR()">🌍 Bekijk in AR</button>
 
     <!-- QR Scanner Container -->
     <div id="scanner-container">
-        <video id="video"></video>
-        <button onclick="stopQRScanner()">❌ Stop scannen</button>
+        <video id="video" playsinline></video>
+        <button onclick="stopQRScanner()">⛔ Stop met scannen</button>
     </div>
 
     <!-- Model-viewer script -->
     <script type="module" src="https://unpkg.com/@google/model-viewer/dist/model-viewer.min.js"></script>
-
+    
     <script>
-        let scanning = false;
+        let videoStream = null;
 
         function startQRScanner() {
             const scannerContainer = document.getElementById("scanner-container");
             const video = document.getElementById("video");
+
             scannerContainer.style.display = "flex";
 
             navigator.mediaDevices.getUserMedia({ video: { facingMode: "environment" } })
                 .then(stream => {
+                    videoStream = stream;
                     video.srcObject = stream;
                     video.setAttribute("playsinline", true);
                     video.play();
-                    scanning = true;
                     scanQRCode(video);
                 })
                 .catch(error => {
-                    alert("Kan geen toegang krijgen tot de camera. Controleer de browserinstellingen.");
-                    console.error(error);
+                    console.error("❌ Camera-fout:", error);
+                    alert("Kan geen toegang krijgen tot de camera. Controleer je browserinstellingen!");
                 });
         }
 
@@ -102,63 +100,44 @@
             const canvas = document.createElement("canvas");
             const context = canvas.getContext("2d");
 
-            function tick() {
-                if (!scanning) return;
-
+            function scan() {
                 if (video.readyState === video.HAVE_ENOUGH_DATA) {
                     canvas.width = video.videoWidth;
                     canvas.height = video.videoHeight;
                     context.drawImage(video, 0, 0, canvas.width, canvas.height);
+                    
                     const imageData = context.getImageData(0, 0, canvas.width, canvas.height);
-                    const code = jsQR(imageData.data, imageData.width, imageData.height, { inversionAttempts: "dontInvert" });
+                    const qrCode = jsQR(imageData.data, canvas.width, canvas.height);
 
-                    if (code) {
-                        loadModel(code.data);
+                    if (qrCode) {
+                        console.log("✅ QR-code gescand:", qrCode.data);
+                        document.getElementById("ar-viewer").setAttribute("src", qrCode.data);
                         stopQRScanner();
-                        return;
+                    } else {
+                        requestAnimationFrame(scan);
                     }
+                } else {
+                    requestAnimationFrame(scan);
                 }
-                requestAnimationFrame(tick);
             }
-            tick();
+            scan();
         }
 
         function stopQRScanner() {
             const scannerContainer = document.getElementById("scanner-container");
-            const video = document.getElementById("video");
-            scanning = false;
             scannerContainer.style.display = "none";
-            video.srcObject?.getTracks().forEach(track => track.stop());
-        }
 
-        function loadModel(modelURL) {
-            let modelViewer = document.getElementById("ar-viewer");
-
-            if (!modelURL.includes(".glb") && !modelURL.includes(".usdz")) {
-                alert("Geen geldig 3D-model gevonden in de QR-code.");
-                return;
-            }
-
-            if (modelURL.endsWith(".usdz")) {
-                modelViewer.setAttribute("ios-src", modelURL);
-                modelViewer.setAttribute("src", "");
-            } else {
-                modelViewer.setAttribute("src", modelURL);
+            if (videoStream) {
+                videoStream.getTracks().forEach(track => track.stop());
             }
         }
 
         function openAR() {
-            let modelViewer = document.getElementById("ar-viewer");
-
-            if (!modelViewer.src && !modelViewer.getAttribute("ios-src")) {
-                alert("Scan eerst een QR-code om een model te laden!");
-                return;
-            }
-
-            if (navigator.userAgent.includes("iPhone") || navigator.userAgent.includes("iPad")) {
-                window.location.href = modelViewer.getAttribute("ios-src");
-            } else {
+            const modelViewer = document.getElementById("ar-viewer");
+            if (modelViewer.canActivateAR) {
                 modelViewer.activateAR();
+            } else {
+                alert("AR-weergave wordt niet ondersteund op dit apparaat.");
             }
         }
     </script>
