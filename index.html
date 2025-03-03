@@ -4,25 +4,60 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>AR Viewer WV</title>
+    <style>
+        body {
+            text-align: center;
+            font-family: Arial, sans-serif;
+        }
+        model-viewer {
+            width: 100%;
+            height: 500px;
+            margin-top: 20px;
+        }
+        button {
+            background-color: #007BFF;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            font-size: 18px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin-top: 20px;
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+    </style>
 </head>
 <body>
-    <h1>AR Viewer for 3D Files B</h1>
+    <h1>AR Viewer for 3D Files + KNOP</h1>
     
-    <!-- AR model viewer met Google Drive link -->
+    <!-- Model Viewer -->
     <model-viewer 
+        id="ar-viewer"
         src="https://www.googleapis.com/drive/v3/files/1MPloneteMdAoZ61T91MGB-f8g8dal7pY?alt=media&key=AIzaSyBJi5XYF7oaLS5W7RPfX4m3HqcCK8i_jcs"
         alt="A 3D model" 
         auto-rotate 
         camera-controls 
         ar 
-        ar-modes="webxr scene-viewer quick-look" 
-        style="width: 100%; height: 500px;">
+        ar-modes="webxr scene-viewer quick-look">
     </model-viewer>
+
+    <!-- Knop om AR-modus te openen -->
+    <button onclick="openAR()">Bekijk in AR</button>
 
     <!-- Model-viewer script -->
     <script type="module" src="https://unpkg.com/@google/model-viewer/dist/model-viewer.min.js"></script>
+    
+    <script>
+        function openAR() {
+            const modelViewer = document.getElementById("ar-viewer");
+            if (modelViewer.canActivateAR) {
+                modelViewer.activateAR();
+            } else {
+                alert("AR-weergave wordt niet ondersteund op dit apparaat.");
+            }
+        }
+    </script>
 </body>
 </html>
-
-
-
