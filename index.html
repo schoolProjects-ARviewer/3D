@@ -5,39 +5,64 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>AR Viewer WV</title>
     <script type="module" src="https://unpkg.com/@google/model-viewer/dist/model-viewer.min.js"></script>
+    <script src="https://unpkg.com/html5-qrcode"></script>  <!-- QR Scanner Library -->
+    <style>
+        body { text-align: center; font-family: Arial, sans-serif; }
+        model-viewer { width: 100%; height: 500px; }
+        button { margin: 10px; padding: 10px 20px; font-size: 16px; cursor: pointer; }
+        #qr-reader { width: 300px; margin: auto; display: none; }
+    </style>
 </head>
 <body>
-    <h1>Scan een QR-code om een model te laden</h1>
 
-    <!-- QR-code invoerveld -->
-    <input type="text" id="qr-input" placeholder="Scan hier de QR-code link" oninput="loadFromQR()">
-
-    <br><br>
+    <h1>Scan een QR-code om een model te laden v</h1>
 
     <!-- Model Viewer -->
-    <model-viewer id="ar-viewer" 
-        src=""  <!-- Laat leeg; wordt later geladen -->
-        alt="3D Model" 
-        auto-rotate camera-controls ar ar-modes="webxr scene-viewer quick-look"
-        style="width: 100%; height: 500px;">
+    <model-viewer id="ar-viewer"
+        src=""  <!-- Laat leeg, wordt later geladen -->
+        alt="3D Model"
+        auto-rotate camera-controls ar ar-modes="webxr scene-viewer quick-look">
     </model-viewer>
 
-    <br><br>
+    <br>
 
-    <!-- AR Start knop -->
-    <button onclick="startAR()">Bekijk in AR</button>
+    <!-- Knoppen -->
+    <button onclick="startQRScanner()">📷 Scan QR-code</button>
+    <button onclick="startAR()">🔮 Bekijk in AR</button>
+
+    <!-- QR-code scanner -->
+    <div id="qr-reader"></div>
 
     <script>
-        function loadFromQR() {
-            let qrInput = document.getElementById("qr-input").value;
-            let modelViewer = document.getElementById("ar-viewer");
+        let qrScanner;
 
-            // Controleer of het een geldige link is
-            if (qrInput.startsWith("https://")) {
-                modelViewer.src = qrInput;
-                console.log("Model geladen:", qrInput);
-            } else {
-                console.log("Ongeldige link:", qrInput);
+        function startQRScanner() {
+            document.getElementById("qr-reader").style.display = "block";
+
+            qrScanner = new Html5Qrcode("qr-reader");
+            qrScanner.start(
+                { facingMode: "environment" }, // Achterste camera voor telefoons
+                { fps: 10, qrbox: 250 },
+                (decodedText) => {
+                    let modelViewer = document.getElementById("ar-viewer");
+
+                    if (decodedText.startsWith("https://")) {
+                        modelViewer.src = decodedText;
+                        console.log("Model geladen:", decodedText);
+                        stopQRScanner(); // Scanner stoppen na succesvol scannen
+                    }
+                },
+                (errorMessage) => {
+                    console.log("Scanning...", errorMessage);
+                }
+            );
+        }
+
+        function stopQRScanner() {
+            if (qrScanner) {
+                qrScanner.stop().then(() => {
+                    document.getElementById("qr-reader").style.display = "none";
+                }).catch((err) => console.log("Fout bij stoppen scanner:", err));
             }
         }
 
@@ -49,3 +74,4 @@
 
 </body>
 </html>
+
