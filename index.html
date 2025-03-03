@@ -7,13 +7,22 @@
 </head>
 <body>
     <h1>AR Viewer for 3D Files</h1>
-    <!-- Voeg hier de AR viewer in -->
+    
+    <!-- AR model viewer met Google Drive link -->
+    <model-viewer 
+        src="https://www.googleapis.com/drive/v3/files/1MPloneteMdAoZ61T91MGB-f8g8dal7pY?alt=media&key=AIzaSyBJi5XYF7oaLS5W7RPfX4m3HqcCK8i_jcs"
+        alt="A 3D model" 
+        auto-rotate 
+        camera-controls 
+        ar 
+        ar-modes="webxr scene-viewer quick-look" 
+        style="width: 100%; height: 500px;">
+    </model-viewer>
 
-    <model-viewer src="Horizontal%20exhibitor.glb" alt="A 3D model" auto-rotate camera-controls ar ar-modes="webxr scene-viewer quick-look" style="width: 100%; height: 500px;"></model-viewer>
-
-     <!-- Voeg de model-viewer script toe -->
+    <!-- Model-viewer script -->
     <script type="module" src="https://unpkg.com/@google/model-viewer/dist/model-viewer.min.js"></script>
 </body>
 </html>
+
 
 
