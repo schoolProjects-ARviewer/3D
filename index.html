@@ -16,12 +16,16 @@
 </head>
 <body>
 
-    <h1>Scan een QR-code om een model te laden - optimized 3</h1>
+    <h1>Scan een QR-code om een model te laden</h1>
 
     <!-- Model Viewer -->
     <model-viewer id="ar-viewer"
         src=""  <!-- Laat leeg, wordt later geladen -->
-        auto-rotate camera-controls ar ar-modes="webxr scene-viewer quick-look">
+        auto-rotate 
+        camera-controls 
+        ar 
+        ar-modes="webxr scene-viewer quick-look"
+        ios-src="">  <!-- Voor iPhones kan hier een .usdz versie komen -->
     </model-viewer>
 
     <br>
@@ -50,9 +54,13 @@
                     let modelViewer = document.getElementById("ar-viewer");
 
                     if (decodedText.startsWith("https://")) {
-                        modelViewer.src = decodedText;
-                        console.log("Model geladen:", decodedText);
-                        closeQRScanner(); // Scanner sluiten na succesvol scannen
+                        modelViewer.src = "";  // Eerst leegmaken om opnieuw te laden
+                        setTimeout(() => {
+                            modelViewer.src = decodedText; // Dan opnieuw instellen
+                            modelViewer.setAttribute("ios-src", decodedText.replace(".glb", ".usdz")); // Voor iPhone AR support
+                            console.log("Model geladen:", decodedText);
+                            closeQRScanner();
+                        }, 100); // Kleine vertraging om renderproblemen te voorkomen
                     }
                 },
                 (errorMessage) => {
@@ -71,7 +79,11 @@
 
         function startAR() {
             let modelViewer = document.getElementById("ar-viewer");
-            modelViewer.activateAR();
+            if (modelViewer.src) {
+                modelViewer.activateAR();
+            } else {
+                alert("Scan eerst een QR-code om een model te laden!");
+            }
         }
     </script>
 
