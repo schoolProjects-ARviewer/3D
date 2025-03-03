@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>3Dmaatwerkmakers</title>
+    <title>AR Viewer WV</title>
 
     <!-- QR Scanner Library -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html5-qrcode/2.3.8/html5-qrcode.min.js"></script>
@@ -68,7 +68,7 @@
     </style>
 </head>
 <body>
-    <h1>AR Viewer by 3Dmaatwerkers</h1>
+    <h1>AR Viewer for 3D Files</h1>
     
     <!-- Model Viewer -->
     <model-viewer 
@@ -78,7 +78,8 @@
         auto-rotate 
         camera-controls 
         ar 
-        ar-modes="webxr scene-viewer quick-look">
+        ar-modes="webxr scene-viewer quick-look"
+        onload="hideLoading()">
     </model-viewer>
 
     <!-- Knoppen -->
@@ -144,6 +145,10 @@
 
         function updateScanButton() {
             document.getElementById("scan-btn").textContent = modelLoaded ? "🔄 Scan nieuwe QR Code" : "📷 Scan QR Code";
+        }
+
+        function hideLoading() {
+            document.getElementById("loading").style.display = "none";
         }
     </script>
 </body>
