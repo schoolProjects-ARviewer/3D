@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AR Viewer WV</title>
+    <title>3Dmaatwerkmakers</title>
 
     <!-- QR Scanner Library -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html5-qrcode/2.3.8/html5-qrcode.min.js"></script>
@@ -39,7 +39,6 @@
             width: 100%;
             height: 100%;
             background: rgba(0, 0, 0, 0.8);
-            display: flex;
             justify-content: center;
             align-items: center;
             flex-direction: column;
@@ -52,7 +51,7 @@
     </style>
 </head>
 <body>
-    <h1>AR Viewer for 3D Files wv</h1>
+    <h1>AR Viewer for 3D Files</h1>
     
     <!-- Model Viewer -->
     <model-viewer 
@@ -80,25 +79,29 @@
     
     <script>
         let html5QrCode;
+        let scannerStarted = false;
 
         function startQRScanner() {
             document.getElementById("qr-container").style.display = "flex";
 
-            html5QrCode = new Html5Qrcode("qr-reader");
-            html5QrCode.start(
-                { facingMode: "environment" }, // Achterste camera
-                { fps: 10, qrbox: 250 },
-                (decodedText) => {
-                    console.log("✅ QR-code gescand:", decodedText);
-                    document.getElementById("ar-viewer").setAttribute("src", decodedText);
-                    stopQRScanner();
-                },
-                (errorMessage) => {
-                    console.log("QR Scan fout:", errorMessage);
-                }
-            ).catch(err => {
-                console.error("Fout bij het starten van de scanner:", err);
-            });
+            if (!scannerStarted) {
+                html5QrCode = new Html5Qrcode("qr-reader");
+                html5QrCode.start(
+                    { facingMode: "environment" }, // Achterste camera
+                    { fps: 10, qrbox: 250 },
+                    (decodedText) => {
+                        console.log("✅ QR-code gescand:", decodedText);
+                        document.getElementById("ar-viewer").setAttribute("src", decodedText);
+                        stopQRScanner();
+                    },
+                    (errorMessage) => {
+                        console.log("QR Scan fout:", errorMessage);
+                    }
+                ).catch(err => {
+                    console.error("Fout bij het starten van de scanner:", err);
+                });
+                scannerStarted = true;
+            }
         }
 
         function stopQRScanner() {
