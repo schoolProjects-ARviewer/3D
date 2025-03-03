@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AR Viewer WV</title>
+    <title>AR Viewer wes</title>
 
     <!-- QR Scanner Library -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html5-qrcode/2.3.8/html5-qrcode.min.js"></script>
@@ -66,7 +66,7 @@
     </style>
 </head>
 <body>
-    <h1>hAR Viewer for 3D Files</h1>
+    <h1>AR Viewer for 3D Files</h1>
     
     <!-- Model Viewer -->
     <model-viewer 
@@ -80,7 +80,7 @@
     </model-viewer>
 
     <!-- Knoppen -->
-    <button onclick="startQRScanner()">📷 Scan QR Code</button>
+    <button id="scan-btn" onclick="startQRScanner()">📷 Scan QR Code</button>
     <button onclick="openAR()">🌍 Bekijk in AR</button>
 
     <!-- Laadindicator -->
@@ -98,6 +98,7 @@
     
     <script>
         let html5QrCode;
+        let modelLoaded = false;
         
         function startQRScanner() {
             document.getElementById("qr-container").style.display = "flex";
@@ -111,6 +112,8 @@
                     document.getElementById("qr-message").style.display = "block";
                     document.getElementById("loading").style.display = "block";
                     document.getElementById("ar-viewer").setAttribute("src", decodedText);
+                    modelLoaded = true;
+                    updateScanButton();
                     stopQRScanner();
                 },
                 (errorMessage) => {
@@ -135,6 +138,10 @@
             } else {
                 alert("AR-weergave wordt niet ondersteund op dit apparaat.");
             }
+        }
+
+        function updateScanButton() {
+            document.getElementById("scan-btn").textContent = modelLoaded ? "🔄 Scan nieuwe QR Code" : "📷 Scan QR Code";
         }
     </script>
 </body>
