@@ -4,60 +4,48 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>AR Viewer WV</title>
-    <style>
-        body {
-            text-align: center;
-            font-family: Arial, sans-serif;
-        }
-        model-viewer {
-            width: 100%;
-            height: 500px;
-            margin-top: 20px;
-        }
-        button {
-            background-color: #007BFF;
-            color: white;
-            border: none;
-            padding: 10px 20px;
-            font-size: 18px;
-            border-radius: 5px;
-            cursor: pointer;
-            margin-top: 20px;
-        }
-        button:hover {
-            background-color: #0056b3;
-        }
-    </style>
+    <script type="module" src="https://unpkg.com/@google/model-viewer/dist/model-viewer.min.js"></script>
 </head>
 <body>
-    <h1>AR Viewer for 3D Files + KNOP</h1>
-    
+    <h1>Scan een QR-code om een model te laden</h1>
+
+    <!-- QR-code invoerveld -->
+    <input type="text" id="qr-input" placeholder="Scan hier de QR-code link" oninput="loadFromQR()">
+
+    <br><br>
+
     <!-- Model Viewer -->
-    <model-viewer 
-        id="ar-viewer"
-        src="https://www.googleapis.com/drive/v3/files/1MPloneteMdAoZ61T91MGB-f8g8dal7pY?alt=media&key=AIzaSyBJi5XYF7oaLS5W7RPfX4m3HqcCK8i_jcs"
-        alt="A 3D model" 
-        auto-rotate 
-        camera-controls 
-        ar 
-        ar-modes="webxr scene-viewer quick-look">
+    <model-viewer id="ar-viewer" 
+        src=""  <!-- Laat leeg; wordt later geladen -->
+        alt="3D Model" 
+        auto-rotate camera-controls ar ar-modes="webxr scene-viewer quick-look"
+        style="width: 100%; height: 500px;">
     </model-viewer>
 
-    <!-- Knop om AR-modus te openen -->
-    <button onclick="openAR()">Bekijk in AR</button>
+    <br><br>
 
-    <!-- Model-viewer script -->
-    <script type="module" src="https://unpkg.com/@google/model-viewer/dist/model-viewer.min.js"></script>
-    
+    <!-- AR Start knop -->
+    <button onclick="startAR()">Bekijk in AR</button>
+
     <script>
-        function openAR() {
-            const modelViewer = document.getElementById("ar-viewer");
-            if (modelViewer.canActivateAR) {
-                modelViewer.activateAR();
+        function loadFromQR() {
+            let qrInput = document.getElementById("qr-input").value;
+            let modelViewer = document.getElementById("ar-viewer");
+
+            // Controleer of het een geldige link is
+            if (qrInput.startsWith("https://")) {
+                modelViewer.src = qrInput;
+                console.log("Model geladen:", qrInput);
             } else {
-                alert("AR-weergave wordt niet ondersteund op dit apparaat.");
+                console.log("Ongeldige link:", qrInput);
             }
         }
+
+        function startAR() {
+            let modelViewer = document.getElementById("ar-viewer");
+            modelViewer.activateAR();
+        }
     </script>
+
 </body>
 </html>
